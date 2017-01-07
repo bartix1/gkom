@@ -14,6 +14,8 @@ GLFWwindow* window;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <thread>
+
 #include "shader.hpp"
 #include "controls.hpp"
 #include "utils.hpp"
@@ -342,8 +344,20 @@ int main( void )
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(programID);
 
+
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			controller.setMoving(true);
+			controller.moveControl();
+
+		else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		{
+			std::thread th(&Controller::rotateControl, &controller, -1);
+			th.detach();
+		}
+		else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+		{
+			std::thread th(&Controller::rotateControl, &controller, 1);
+			th.detach();
+		}
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
@@ -352,20 +366,14 @@ int main( void )
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		glm::mat4 MVPWrench, NutModelMatrix, MVPNut;
-		NutModelMatrix = ModelMatrix;
+
 		if (controller.isMoving())
-		{
-			if (controller.isRotating())
-			{
-				WrenchModelMatrix = controller.computeRotation();
-				NutModelMatrix = glm::rotate(ModelMatrix, controller.getRotation()- 0.52358f, rot);
-			}
-			else
-			{
-				WrenchModelMatrix = controller.computeDistance();
-				MVPNut = ProjectionMatrix * ViewMatrix * ModelMatrix;
-			}
-		}
+			controller.computeDistance();
+		else if (controller.isRotating())
+			controller.computePosition();
+
+		WrenchModelMatrix = controller.getWrench();
+		NutModelMatrix = controller.getNut();
 		MVPWrench = ProjectionMatrix * ViewMatrix * WrenchModelMatrix;
 		MVPNut = ProjectionMatrix * ViewMatrix * NutModelMatrix;
 
