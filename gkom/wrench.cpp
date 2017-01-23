@@ -8,21 +8,6 @@ Wrench::Wrench(double d, double w, double h)
 
 void Wrench::make_handle(double d, double w, double h)
 {
-	/* vertice v1 = std::make_tuple(-d / 2, h / 2, w / 4);
-	vertice v2 = std::make_tuple(-d / 2, -h / 2, w / 4);
-	vertice v3 = std::make_tuple(-d / 2, h / 2, -3* w / 4);
-	make_triangle(v1, v2, v3);
-	v1 = std::make_tuple(-d / 2, -h / 2, -3 * w / 4);
-	make_triangle(v1, v2, v3);
-	v2 = std::make_tuple(d / 2, - h / 2, -3 * w / 4);
-	make_triangle(v1, v2, v3);
-	v1 = std::make_tuple(d / 2, h / 2, -3 * w / 4);
-	make_triangle(v1, v2, v3);
-	v3 = std::make_tuple(d / 2, h / 2, w / 4);
-	make_triangle(v1, v2, v3);
-	v1 = std::make_tuple(-d / 2, -h / 2, w / 4);
-	make_triangle(v1, v2, v3); */
-
 	vertice v1 = std::make_tuple(-d / 2, h / 2, w / 4);
 	vertice v2 = std::make_tuple(d / 2, h / 2, w / 4);
 	vertice v3 = std::make_tuple(d / 2, h / 2, -3 * w / 4);

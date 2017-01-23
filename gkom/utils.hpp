@@ -32,8 +32,6 @@ GLuint loadBMP_custom(const char * imagepath) {
 	if (!file) { printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath); getchar(); return 0; }
 
 	// Read the header, i.e. the 54 first bytes
-
-	// If less than 54 bytes are read, problem
 	if (fread(header, 1, 54, file) != 54) {
 		printf("Not a correct BMP file\n");
 		return 0;
@@ -53,11 +51,11 @@ GLuint loadBMP_custom(const char * imagepath) {
 	width = *(int*)&(header[0x12]);
 	height = *(int*)&(header[0x16]);
 
-	// Some BMP files are misformatted, guess missing information
+	// Some BMP files are misformatted
 	if (imageSize == 0)    imageSize = width*height * 3; // 3 : one byte for each Red, Green and Blue component
 	if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
 
-										 // Create a buffer
+	// Create a buffer
 	data = new unsigned char[imageSize];
 
 	// Read the actual data from the file into the buffer

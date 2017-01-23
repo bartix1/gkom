@@ -24,7 +24,7 @@ void Controller::computePosition()
 
 void Controller::computeRotation()
 {
-	current_rot += 0.001f * rotate_direction;
+	current_rot += rotate_speed * rotate_direction;
 	if (current_rot >= 2 * 3.1415)
 		current_rot -= 2 * 3.1415;
 	else if (current_rot <= 2 * 3.1415)
@@ -33,14 +33,14 @@ void Controller::computeRotation()
 
 void Controller::computeDistance()
 {
-	current_distance += 0.002f * move_direction;
+	current_distance += horizontal_speed * move_direction;
 	if (current_distance >= -2.5f || current_distance <= -5.0f)
 		moving = false;
 }
 
 void Controller::computeHeight()
 {
-	current_height += 0.0002f * rotate_direction;
+	current_height += vertical_speed * rotate_direction;
 }
 
 void Controller::moveControl()
@@ -53,7 +53,11 @@ void Controller::moveControl()
 
 void Controller::rotateControl(int dir)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	//std::lock_guard<std::mutex> lock(mutex);
+	std::unique_lock<std::mutex> lock(mutex, std::try_to_lock);
+	if (!lock.owns_lock()) {
+		return;
+	}
 	if (moving)
 		return;
 	// HOLDING NUT
@@ -68,8 +72,12 @@ void Controller::rotateControl(int dir)
 			rotating = !rotating;
 		//CHANGE DIRECTION
 		else
+		{
+			rotating = true;
 			rotate_direction = dir;
+		}
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 glm::mat4 Controller::getWrench() const

@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 
 // Include GLFW
+// #include <GL/glfw3.h>
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
@@ -13,8 +14,6 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-
-#include <thread>
 
 #include "shader.hpp"
 #include "controls.hpp"
@@ -33,10 +32,10 @@ int main( void )
 		return -1;
 	}
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_SAMPLES, 4);  // 4x antialiasing
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);  // OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window
@@ -47,9 +46,9 @@ int main( void )
 		glfwTerminate();
 		return -1;
 	}
-    glfwMakeContextCurrent(window);
 
 	// GLEW Init
+    glfwMakeContextCurrent(window);
 	glewExperimental = true; 
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
@@ -156,9 +155,12 @@ int main( void )
 	}
 
 	//NUT VERTICES 
-	Nut * nut = new Nut();
-	static GLfloat g_vertex_nut[120*3*3];
-	for (int i = 0; i < 120*3; i++)
+	const int nut_outer_sides = 6;
+	const int nut_inner_sides = nut_outer_sides * 4;
+	const int nut_triangles = (nut_inner_sides + nut_outer_sides) * 4;
+	Nut * nut = new Nut(nut_inner_sides, 0.5, nut_outer_sides, 1, 1);
+	static GLfloat g_vertex_nut[nut_triangles *3*3];
+	for (int i = 0; i < nut_triangles *3; i++)
 	{
 		g_vertex_nut[3 * i] = GLfloat(std::get<0>(nut->vert_vector[i]));
 		g_vertex_nut[3 * i + 1] = GLfloat(std::get<1>(nut->vert_vector[i]));
@@ -167,8 +169,8 @@ int main( void )
 	delete nut;
 
 	//NUT TEXTURE UV
-	static GLfloat g_uv_nut[120 * 3*3];
-	for (int i = 0; i < 120*2; i++)
+	static GLfloat g_uv_nut[nut_triangles * 3*3];
+	for (int i = 0; i < nut_triangles *2; i++)
 	{
 		g_uv_nut[3 * i] = 0.0f;
 		g_uv_nut[3 * i + 1] = 0.3f;
@@ -256,9 +258,10 @@ int main( void )
 	}
 
 	//SCREW VERTICES
-	Cylinder * cylinder = new Cylinder(96, 0.482, 5);
-	static GLfloat g_vertex_screw[96*4*3*3];
-	for (int i = 0; i < 96*4*3; i++)
+	const int screw_sides = 96;
+	Cylinder * cylinder = new Cylinder(screw_sides, 0.482, 5);
+	static GLfloat g_vertex_screw[screw_sides*4*3*3];
+	for (int i = 0; i < screw_sides *4*3; i++)
 	{
 		g_vertex_screw[3 * i] = GLfloat(std::get<0>(cylinder->vert_vector[i]));
 		g_vertex_screw[3 * i + 1] = GLfloat(std::get<1>(cylinder->vert_vector[i]));
@@ -266,8 +269,8 @@ int main( void )
 	}
 	delete cylinder;
 
-	static GLfloat g_uv_screw[96 *4* 3 * 2];
-	for (int i = 0; i < 96*2; i++)
+	static GLfloat g_uv_screw[screw_sides *4* 3 * 2];
+	for (int i = 0; i < screw_sides *2; i++)
 	{
 		g_uv_screw[12 * i] = 0.0f;
 		g_uv_screw[12 * i + 1] = 0.2f;
@@ -385,7 +388,7 @@ int main( void )
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVPNut[0][0]);
 		bind_texture(uvnut, NutTexture);
 		bind_buffer(0, nutbuffer);
-		glDrawArrays(GL_TRIANGLES, 0, 120 * 3);
+		glDrawArrays(GL_TRIANGLES, 0, nut_triangles * 3);
 												  
 		// SCENE
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -397,7 +400,7 @@ int main( void )
 		//glDisableVertexAttribArray(1);
 		bind_buffer(0, screwbuffer);
 		bind_texture(uvscrew, ScrewTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 96 *4*3);
+		glDrawArrays(GL_TRIANGLES, 0, screw_sides *4*3);
 		
 		// BLOCK
 		glEnableVertexAttribArray(1);

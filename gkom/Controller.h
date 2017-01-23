@@ -3,6 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <mutex>
+#include <thread>
+#include <chrono>
 
 class Controller
 {
@@ -14,8 +16,6 @@ public:
 	void rotateControl(int dir);
 	glm::mat4 getWrench() const;
 	glm::mat4 getNut() const;
-
-
 
 
 	bool isMoving() const;
@@ -36,6 +36,11 @@ private:
 	bool rotating;
 	int move_direction; // 1 - towards nut, -1 - opposite dir
 	int rotate_direction; // 1 - left, -1 - right
+
+	const float rotate_speed = 0.001f;
+	const float horizontal_speed = 0.002f;
+	const float vertical_speed = 0.0002f;
+
 
 	std::mutex mutex;
 };
